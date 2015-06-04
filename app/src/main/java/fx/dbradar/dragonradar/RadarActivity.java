@@ -7,6 +7,8 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,6 +49,13 @@ public class RadarActivity extends Activity {
     DBMarkersOverlay dbMarkersOverlay;
 
     public MapView mv;
+
+    private SoundPool soundPool;
+    private int soundID;
+    boolean plays = false, loaded = false;
+    float actVolume, maxVolume, volume;
+    AudioManager audioManager;
+    int counter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,11 +107,11 @@ public class RadarActivity extends Activity {
         /////
 
         LocationManager locationManager = (LocationManager)
-        getSystemService(Context.LOCATION_SERVICE);
+                getSystemService(Context.LOCATION_SERVICE);
 
         LocationListener locationListener = new MyLocationListener(this);
         locationManager.requestLocationUpdates(
-        LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+                LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
 
 
         /////
@@ -115,7 +124,7 @@ public class RadarActivity extends Activity {
 
             public void run() {
 
-                String url="http://179.43.127.156:9001/get_friends_positions";
+                String url = "http://179.43.127.156:9001/get_friends_positions";
 
                 System.setProperty("http.proxyHost", "proxy.example.com");
                 System.setProperty("http.proxyPort", "8080");
@@ -149,9 +158,9 @@ public class RadarActivity extends Activity {
 
                     int HttpResult = con.getResponseCode();
 
-                    if(HttpResult == HttpURLConnection.HTTP_OK){
+                    if (HttpResult == HttpURLConnection.HTTP_OK) {
 
-                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(),"utf-8"));
+                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
 
                         String line = null;
 
@@ -166,7 +175,6 @@ public class RadarActivity extends Activity {
                         Log.d("RadarActivity", "" + json);
 
 
-
                         ///
 
                         JSONObject jObject = new JSONObject(json);
@@ -175,8 +183,7 @@ public class RadarActivity extends Activity {
 
                         positions = new LatLng[jArray.length()];
 
-                        for (int i=0; i < jArray.length(); i++)
-                        {
+                        for (int i = 0; i < jArray.length(); i++) {
                             try {
                                 JSONObject oneObject = jArray.getJSONObject(i);
 
@@ -195,7 +202,7 @@ public class RadarActivity extends Activity {
 
                         ///
 
-                    }else{
+                    } else {
                         Log.d("RadarActivity", "" + con.getResponseMessage());
                     }
                 } catch (IOException e) {
@@ -207,6 +214,41 @@ public class RadarActivity extends Activity {
             }
 
         }, delay, period);
+
+
+        ////
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        actVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        volume = actVolume / maxVolume;
+
+        this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        counter = 0;
+
+        soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                loaded = true;
+                soundPool.play(soundID, volume, volume, 1, -1, 1f);
+            }
+        });
+        soundID = soundPool.load(this, R.raw.ti_ti_ti, 1);
+        ////
+    }
+
+
+    public void playLoop() {
+        // Is the sound loaded does it already play?
+        if (loaded && !plays) {
+            // the sound will play for ever if we put the loop parameter -1
+            soundPool.play(soundID, volume, volume, 1, -1, 1f);
+            counter = counter++;
+            Toast.makeText(this, "Plays loop", Toast.LENGTH_SHORT).show();
+            plays = true;
+        }
+
     }
 
     @Override
@@ -261,13 +303,16 @@ public class RadarActivity extends Activity {
         }
 
         @Override
-        public void onProviderDisabled(String provider) {}
+        public void onProviderDisabled(String provider) {
+        }
 
         @Override
-        public void onProviderEnabled(String provider) {}
+        public void onProviderEnabled(String provider) {
+        }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
     }
 
     private class UpdatePositionTask extends AsyncTask<String, Void, LatLng> {
@@ -280,7 +325,7 @@ public class RadarActivity extends Activity {
 
         @Override
         protected LatLng doInBackground(String... params) {
-            String url="http://179.43.127.156:9001/update_position";
+            String url = "http://179.43.127.156:9001/update_position";
 
             System.setProperty("http.proxyHost", "proxy.example.com");
             System.setProperty("http.proxyPort", "8080");
@@ -314,9 +359,9 @@ public class RadarActivity extends Activity {
 
                 int HttpResult = con.getResponseCode();
 
-                if(HttpResult == HttpURLConnection.HTTP_OK){
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
 
-                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(),"utf-8"));
+                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
 
                     String line = null;
 
@@ -328,7 +373,7 @@ public class RadarActivity extends Activity {
 
                     Log.d("RadarActivity", "" + sb.toString());
 
-                }else{
+                } else {
                     Log.d("RadarActivity", "" + con.getResponseMessage());
                 }
             } catch (IOException e) {
