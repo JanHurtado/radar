@@ -1,29 +1,12 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+### To Do ###
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+* Autenticación 
+* Interfaz de ver amigos, añadir amigo, aceptar amigo, etc.
+* Rotar el mapa según la brújula
+* Arreglar las funciones onCreate, onPause, onResume, etc de las Activities
+* Refactorizar el código
+* Mover el código de actualizar la posición y solicitar las posiciones de los amigos a un servicio.
+* Arreglar el uso de GPS, consume mucha batería.
+* Desactivar la localización del MapBox y usar la nuestra
