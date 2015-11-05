@@ -15,6 +15,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
+import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.api.ILatLng;
@@ -33,6 +37,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -50,6 +55,7 @@ public class RadarActivity extends Activity {
 
     public MapView mv;
 
+    private Switch switch1;
     private SoundPool soundPool;
     private int soundID;
     boolean plays = false, loaded = false;
@@ -58,9 +64,27 @@ public class RadarActivity extends Activity {
     int counter;
 
     @Override
+    public void onStart(){
+        super.onStart();
+        audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+    }
+    @Override
+    protected void onStop(){
+        super.onStop();
+        //audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(this, "onDestroy() de Radar", Toast.LENGTH_LONG).show();
+        System.exit(0);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_radar);
+        switch1 = (Switch) findViewById(R.id.switch1);
 
         mv = (MapView) findViewById(R.id.mapview);
 
@@ -94,8 +118,8 @@ public class RadarActivity extends Activity {
         });
         mv.getOverlayManager().add(mapEventsOverlay);
 
-        mv.setUserLocationEnabled(true);
-        mv.setUserLocationTrackingMode(UserLocationOverlay.TrackingMode.FOLLOW);
+        //mv.setUserLocationEnabled(true);
+        //mv.setUserLocationTrackingMode(UserLocationOverlay.TrackingMode.FOLLOW_BEARING);
 
         mv.setDiskCacheEnabled(true);
 
@@ -124,92 +148,7 @@ public class RadarActivity extends Activity {
 
             public void run() {
 
-                String url = "http://179.43.127.156:9001/get_friends_positions";
 
-                System.setProperty("http.proxyHost", "proxy.example.com");
-                System.setProperty("http.proxyPort", "8080");
-
-                LatLng[] positions;
-
-                ///
-                try {
-                    URL object = new URL(url);
-
-                    HttpURLConnection con = (HttpURLConnection) object.openConnection();
-
-                    con.setDoOutput(true);
-                    con.setRequestMethod("GET");
-                    con.setUseCaches(false);
-                    con.setDoInput(true);
-                    con.setConnectTimeout(10000);
-                    con.setReadTimeout(10000);
-                    con.setRequestProperty("Content-Type", "application/json");
-                    con.setRequestProperty("Accept", "application/json");
-
-
-                    JSONObject data = new JSONObject();
-                    data.put("username", username);
-                    OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-
-                    out.write(data.toString());
-                    out.close();
-
-                    StringBuilder sb = new StringBuilder();
-
-                    int HttpResult = con.getResponseCode();
-
-                    if (HttpResult == HttpURLConnection.HTTP_OK) {
-
-                        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-
-                        String line = null;
-
-                        while ((line = br.readLine()) != null) {
-                            sb.append(line + "\n");
-                        }
-
-                        br.close();
-
-                        String json = sb.toString();
-
-                        Log.d("RadarActivity", "" + json);
-
-
-                        ///
-
-                        JSONObject jObject = new JSONObject(json);
-
-                        JSONArray jArray = jObject.getJSONArray("positions");
-
-                        positions = new LatLng[jArray.length()];
-
-                        for (int i = 0; i < jArray.length(); i++) {
-                            try {
-                                JSONObject oneObject = jArray.getJSONObject(i);
-
-                                String username = oneObject.getString("username");
-                                String lat = oneObject.getString("lat");
-                                String lng = oneObject.getString("lng");
-
-                                positions[i] = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-
-                            } catch (JSONException e) {
-                                // Oops
-                            }
-                        }
-
-                        dbMarkersOverlay.setPositions(positions);
-
-                        ///
-
-                    } else {
-                        Log.d("RadarActivity", "" + con.getResponseMessage());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
 
             }
 
@@ -235,6 +174,23 @@ public class RadarActivity extends Activity {
             }
         });
         soundID = soundPool.load(this, R.raw.ti_ti_ti, 1);
+        //soundPool.pause(AudioManager.STREAM_MUSIC);
+        switch1.setChecked(true);
+        switch1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,
+                                         boolean isChecked) {
+
+                if (isChecked) {
+                    audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+                } else {
+                    audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+                }
+
+            }
+        });
+        //soundPool.pause(soundID);
         ////
     }
 
@@ -325,64 +281,6 @@ public class RadarActivity extends Activity {
 
         @Override
         protected LatLng doInBackground(String... params) {
-            String url = "http://179.43.127.156:9001/update_position";
-
-            System.setProperty("http.proxyHost", "proxy.example.com");
-            System.setProperty("http.proxyPort", "8080");
-
-            ///
-            try {
-                URL object = new URL(url);
-
-                HttpURLConnection con = (HttpURLConnection) object.openConnection();
-
-                con.setDoOutput(true);
-                con.setRequestMethod("POST");
-                con.setUseCaches(false);
-                con.setDoInput(true);
-                con.setConnectTimeout(10000);
-                con.setReadTimeout(10000);
-                con.setRequestProperty("Content-Type", "application/json");
-                con.setRequestProperty("Accept", "application/json");
-
-
-                JSONObject data = new JSONObject();
-                data.put("username", username);
-                data.put("lat", lat);
-                data.put("lng", lng);
-
-                OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream());
-                out.write(data.toString());
-                out.close();
-
-                StringBuilder sb = new StringBuilder();
-
-                int HttpResult = con.getResponseCode();
-
-                if (HttpResult == HttpURLConnection.HTTP_OK) {
-
-                    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
-
-                    String line = null;
-
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-
-                    br.close();
-
-                    Log.d("RadarActivity", "" + sb.toString());
-
-                } else {
-                    Log.d("RadarActivity", "" + con.getResponseMessage());
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            ///
-
             return null;
 
         }

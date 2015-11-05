@@ -16,4 +16,14 @@
         mapbox:mapid="kevinz.m2pjbmgk"
         mapbox:accessToken="pk.eyJ1Ijoia2V2aW56IiwiYSI6InpDWFY3Q00ifQ.BnriWtKwE5BsCXx_xejBBw"/>
 
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="sound"
+        android:id="@+id/switch1"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:checked="false" />
+
 </RelativeLayout>

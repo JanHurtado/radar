@@ -5,23 +5,38 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="fx.dbradar.dragonradar.LoginActivity">
-
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Iniciar"
-        android:id="@+id/button"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="121dp"
-        android:onClick="login"/>
+        android:layout_centerInParent="true"
+        android:padding="10dp"
+        >
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_margin="4dp"
+            android:id="@+id/spinner" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_margin="4dp"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/editText" />
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Iniciar"
+            android:id="@+id/button"
+            android:padding="10dp"
+            android:layout_margin="4dp"
+            android:onClick="login"/>
 
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/usernameEditExt"
-        android:layout_marginTop="127dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:width="120dp" />
+    </LinearLayout>
+
+
+
 </RelativeLayout>
